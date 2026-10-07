@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heatmap Decolar - Colaboradores SP</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #d95926 0%, #8b3d1e 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 28px;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 1fr 250px;
+            gap: 1rem;
+            padding: 1rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        #map {
+            height: 700px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 1;
+        }
+
+        .sidebar {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            height: fit-content;
+            position: sticky;
+            top: 1rem;
+        }
+
+        .sidebar h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 10px;
+            font-size: 12px;
+        }
+
+        .legend-circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            border: 1px solid rgba(0,0,0,0.2);
+        }
+
+        .stats {
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #eee;
+        }
+
+        .stat {
+            margin-bottom: 12px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #d95926;
+        }
+
+        .stat-value.secondary {
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: static;
+            }
+
+            #map {
+                height: 500px;
+            }
+        }
+
+        .leaflet-popup-content {
+            font-family: inherit;
+        }
+
+        .leaflet-popup-content-wrapper {
+            border-radius: 6px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Mapa de Calor - Colaboradores Decolar</h1>
+        <p>Distribuição de colaboradores no estado de São Paulo</p>
+    </div>
+
+    <div class="container">
+        <div id="map"></div>
+
+        <div class="sidebar">
+            <h3>Densidade</h3>
+
+            <div class="legend-item">
+                <div class="legend-circle" style="background: #8b3d1e; width: 24px; height: 24px;"></div>
+                <span>Muito alto (250+)</span>
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-circle" style="background: #d95926; width: 22px; height: 22px;"></div>
+                <span>Alto (50-250)</span>
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-circle" style="background: #eda100; width: 20px; height: 20px;"></div>
+                <span>Médio (20-50)</span>
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-circle" style="background: #1baf7a; width: 16px; height: 16px;"></div>
+                <span>Baixo (5-20)</span>
+            </div>
+
+            <div class="legend-item">
+                <div class="legend-circle" style="background: #3266ad; width: 12px; height: 12px;"></div>
+                <span>Muito baixo (&lt;5)</span>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-label">Total SP</div>
+                    <div class="stat-value">779</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-label">Maior concentração</div>
+                    <div class="stat-value" style="color: #d95926;">São Paulo</div>
+                    <div class="stat-label secondary" style="margin-top: 2px; font-size: 10px; color: #999;">372 (47.8%)</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-label">Cidades</div>
+                    <div class="stat-value secondary">52</div>
+                </div>
+
+                <div class="stat">
+                    <div class="stat-label">Região + concentrada</div>
+                    <div class="stat-value secondary">Grande SP</div>
+                    <div class="stat-label secondary" style="margin-top: 2px; font-size: 10px; color: #999;">219 colabs</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Dados de colaboradores por cidade - TODOS os 779
+        const dadosCidades = {
+            "SÃO PAULO": { lat: -23.5505, lng: -46.6333, colabs: 372, regiao: "Capital" },
+            "OSASCO": { lat: -23.5293, lng: -46.7908, colabs: 71, regiao: "Grande SP (Oeste)" },
+            "GUARULHOS": { lat: -23.2833, lng: -46.4833, colabs: 68, regiao: "Grande SP (Leste)" },
+            "BARUERI": { lat: -23.5143, lng: -46.8797, colabs: 41, regiao: "Grande SP (Oeste)" },
+            "CARAPICUÍBA": { lat: -23.5615, lng: -46.8372, colabs: 29, regiao: "Grande SP (Oeste)" },
+            "SÃO BERNARDO DO CAMPO": { lat: -23.6954, lng: -46.5644, colabs: 21, regiao: "ABC Paulista" },
+            "SANTO ANDRÉ": { lat: -23.6628, lng: -46.5379, colabs: 20, regiao: "ABC Paulista" },
+            "DIADEMA": { lat: -23.6841, lng: -46.6154, colabs: 10, regiao: "ABC Paulista" },
+            "TABOÃO DA SERRA": { lat: -23.6124, lng: -46.7511, colabs: 10, regiao: "Grande SP (Sul)" },
+            "CAMPINAS": { lat: -22.9055, lng: -47.0553, colabs: 9, regiao: "Interior (Leste)" },
+            "ITAPEVI": { lat: -23.5338, lng: -46.9452, colabs: 8, regiao: "Grande SP (Oeste)" },
+            "COTIA": { lat: -23.6449, lng: -46.9231, colabs: 8, regiao: "Grande SP (Oeste)" },
+            "JUNDIAÍ": { lat: -23.1899, lng: -46.8869, colabs: 7, regiao: "Interior (Leste)" },
+            "SANTANA DE PARNAÍBA": { lat: -23.4253, lng: -46.9453, colabs: 7, regiao: "Grande SP (Oeste)" },
+            "RIBEIRÃO PIRES": { lat: -23.7269, lng: -46.4161, colabs: 6, regiao: "ABC Paulista" },
+            "JANDIRA": { lat: -23.5658, lng: -46.9122, colabs: 6, regiao: "Grande SP (Oeste)" },
+            "ITAPECERICA DA SERRA": { lat: -23.7136, lng: -46.8486, colabs: 6, regiao: "Grande SP (Sul)" },
+            "MAUÁ": { lat: -23.6614, lng: -46.4611, colabs: 6, regiao: "ABC Paulista" },
+            "SUZANO": { lat: -23.5505, lng: -46.3097, colabs: 6, regiao: "Grande SP (Leste)" },
+            "FRANCO DA ROCHA": { lat: -23.3208, lng: -46.7536, colabs: 6, regiao: "Grande SP (Norte)" },
+            "ITAQUAQUECETUBA": { lat: -23.4714, lng: -46.3600, colabs: 5, regiao: "Grande SP (Leste)" },
+            "EMBU DAS ARTES": { lat: -23.6450, lng: -46.8614, colabs: 5, regiao: "Grande SP (Sul)" },
+            "SÃO CAETANO DO SUL": { lat: -23.6228, lng: -46.5516, colabs: 4, regiao: "ABC Paulista" },
+            "SANTOS": { lat: -23.9608, lng: -46.3331, colabs: 4, regiao: "Litoral" },
+            "CAJAMAR": { lat: -23.3536, lng: -46.8864, colabs: 4, regiao: "Grande SP (Oeste)" },
+            "SOROCABA": { lat: -23.5006, lng: -47.4552, colabs: 3, regiao: "Interior (Sul)" },
+            "SÃO JOSÉ DOS CAMPOS": { lat: -23.1815, lng: -45.8877, colabs: 3, regiao: "Interior (Leste)" },
+            "MOGI DAS CRUZES": { lat: -23.5053, lng: -46.1892, colabs: 3, regiao: "Grande SP (Leste)" },
+            "FRANCISCO MORATO": { lat: -23.3128, lng: -46.7614, colabs: 3, regiao: "Grande SP (Oeste)" },
+            "PAULÍNIA": { lat: -22.7664, lng: -47.1444, colabs: 3, regiao: "Interior (Leste)" },
+            "FERRAZ DE VASCONCELOS": { lat: -23.5194, lng: -46.3658, colabs: 2, regiao: "Grande SP (Leste)" },
+            "SUMARÉ": { lat: -22.8289, lng: -47.2681, colabs: 2, regiao: "Interior (Leste)" },
+            "CAIEIRAS": { lat: -23.3592, lng: -46.7233, colabs: 2, regiao: "Grande SP (Oeste)" },
+            "RIO GRANDE DA SERRA": { lat: -23.7350, lng: -46.4247, colabs: 1, regiao: "ABC Paulista" },
+            "GUARUJÁ": { lat: -23.9889, lng: -46.2555, colabs: 1, regiao: "Litoral" },
+            "MIRASSOL": { lat: -20.8100, lng: -49.4900, colabs: 1, regiao: "Interior (Oeste)" },
+            "INDAIATUBA": { lat: -23.0842, lng: -47.1925, colabs: 1, regiao: "Interior (Leste)" },
+            "PERUÍBE": { lat: -24.3063, lng: -46.9961, colabs: 1, regiao: "Litoral" },
+            "PRAIA GRANDE": { lat: -24.0036, lng: -46.4044, colabs: 1, regiao: "Litoral" },
+            "BOITUVA": { lat: -23.1953, lng: -47.7039, colabs: 1, regiao: "Interior (Sul)" },
+            "SÃO CARLOS": { lat: -22.0180, lng: -47.8915, colabs: 1, regiao: "Interior (Centro)" },
+            "JARINU": { lat: -23.0558, lng: -46.6678, colabs: 1, regiao: "Interior (Leste)" },
+            "SANTA BÁRBARA D OESTE": { lat: -22.7553, lng: -47.4069, colabs: 1, regiao: "Interior (Leste)" },
+            "VARGEM GRANDE PAULISTA": { lat: -23.6717, lng: -46.9833, colabs: 1, regiao: "Grande SP (Sul)" },
+            "EMBU-GUAÇU": { lat: -23.7639, lng: -46.8639, colabs: 1, regiao: "Grande SP (Sul)" },
+            "TAUBATÉ": { lat: -23.0263, lng: -45.5506, colabs: 1, regiao: "Interior (Leste)" },
+            "SÃO ROQUE": { lat: -23.5303, lng: -47.1306, colabs: 1, regiao: "Interior (Oeste)" },
+            "CAMPO LIMPO PAULISTA": { lat: -23.2069, lng: -46.7789, colabs: 1, regiao: "Interior (Oeste)" },
+            "JACAREÍ": { lat: -23.2966, lng: -45.9672, colabs: 1, regiao: "Interior (Leste)" },
+            "ILHABELA": { lat: -23.7784, lng: -45.3646, colabs: 1, regiao: "Litoral" },
+            "RIBEIRÃO PRETO": { lat: -21.1789, lng: -47.8102, colabs: 1, regiao: "Interior (Oeste)" },
+            "POÁ": { lat: -23.5314, lng: -46.4592, colabs: 1, regiao: "Grande SP (Leste)" }
+        };
+
+        // Função para determinar cor baseado no número de colaboradores
+        function getColor(colabs) {
+            if (colabs >= 250) return "#8b3d1e";
+            if (colabs >= 50) return "#d95926";
+            if (colabs >= 20) return "#eda100";
+            if (colabs >= 5) return "#1baf7a";
+            return "#3266ad";
+        }
+
+        // Função para determinar raio da bolha
+        function getRadius(colabs) {
+            return Math.sqrt(colabs) * 2000; // em metros
+        }
+
+        // Inicializar mapa
+        const map = L.map('map').setView([-23.55, -46.63], 9);
+
+        // Adicionar camada OpenStreetMap
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors',
+            maxZoom: 19,
+            opacity: 0.85
+        }).addTo(map);
+
+        // Plotar círculos para cada cidade
+        Object.entries(dadosCidades).forEach(([cidade, dados]) => {
+            const circle = L.circle([dados.lat, dados.lng], {
+                color: getColor(dados.colabs),
+                fillColor: getColor(dados.colabs),
+                fillOpacity: 0.75,
+                weight: 2,
+                radius: getRadius(dados.colabs),
+                className: 'city-circle'
+            }).addTo(map);
+
+            // Popup ao clicar
+            circle.bindPopup(`
+                <div style="font-weight: 600; margin-bottom: 4px; font-size: 14px;">${cidade}</div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 6px;">${dados.regiao}</div>
+                <div style="font-size: 16px; font-weight: 600; color: #d95926;">${dados.colabs} colaboradores</div>
+                <div style="font-size: 11px; color: #999; margin-top: 4px;">${((dados.colabs / 779) * 100).toFixed(1)}% do total</div>
+            `, {
+                closeButton: true,
+                autoClose: true
+            });
+
+            // Tooltip ao passar mouse
+            circle.bindTooltip(`${cidade}: ${dados.colabs} colabs`, {
+                permanent: false,
+                direction: 'top',
+                className: 'leaflet-tooltip'
+            });
+        });
+
+        // Ajustar zoom ao conteúdo
+        map.fitBounds(map.getCenter(), { padding: [50, 50] });
+    </script>
+</body>
+</html>
